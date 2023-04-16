@@ -6,9 +6,9 @@ namespace ConsoleAppMarsRover
 {
     public enum EnumDirections
     {
-        N = 1,//North
+        N = 0,//North
+        E = 1,//East
         S = 2,//South
-        E = 3,//East
-        W = 4//West
+        W = 3//West
     }
 }

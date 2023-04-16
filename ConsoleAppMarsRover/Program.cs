@@ -10,69 +10,36 @@ namespace ConsoleAppMarsRover
      
         static void Main(string[] args)
         {
-            #region IoC
-            var serviceProvider = new ServiceCollection()
-          .AddSingleton<IMachine, RoverPosition>()
-          .BuildServiceProvider();
-            #endregion
+            var dimensionsRead = Console.ReadLine();
+            
+            var dimension = dimensionsRead.Trim().Split(' ').Select(int.Parse).ToList();
 
-            #region def
-            DataResult<List<int>> dataResultDimension = ReadLineDimension();
-            DataResult<StartPositions> dataResultPosition = ReadLinePosition();
-            DataResult<string> dataResultRoute = ReadLineRoute();
-            #endregion
+            var positionAndHeadingRead = Console.ReadLine();
 
-            Creater creater = new Creater(serviceProvider.GetService<IMachine>(), dataResultPosition.Data, dataResultRoute.Data, dataResultDimension.Data);
-            DataResult<string> dataResultStartPosition = creater.StartPosition();
-            if (dataResultStartPosition.Success)
+            var positionAndHeading = positionAndHeadingRead.Trim().Split(' ');
+
+            var rover = new Rover(){X = Convert.ToInt32(positionAndHeading[0]),
+                                    Y = Convert.ToInt32(positionAndHeading[1]),
+                                    Direction = (EnumDirections)Enum.
+                                    Parse(typeof(EnumDirections), positionAndHeading[2].ToUpper())
+            };
+
+            var routeRead = Console.ReadLine();
+
+            var route = routeRead.ToCharArray();
+
+            var dict = new Dictionary<char, Func<Rover, Rover>>
             {
-                Console.WriteLine(dataResultStartPosition.Data);
-            }
-            else
-            {
-                Console.WriteLine(dataResultStartPosition.Message);
-            }
-            Console.ReadKey();
+                { 'L', RoverManager.Left }, {'R', RoverManager.Right}, {'M', RoverManager.Move}
+            };
+
+            route.ToList().ForEach(x => rover = dict[x](rover));
+
+            Console.WriteLine(rover.X.ToString() + " " + rover.Y.ToString() + " " + rover.Direction.ToString());
+
         }
 
-        #region private
-        private static DataResult<string> ReadLineRoute()
-        {
-            Console.Write(Resources.EnterRoute);
-            DataResult<string> dataResultPosition = ValidationHelper.ValidationRoute(Console.ReadLine());
-            if (!dataResultPosition.Success)
-            {
-                Console.WriteLine(dataResultPosition.Message);
-                dataResultPosition = ReadLineRoute();
-            }
-            return dataResultPosition;
-        }
 
-        private static DataResult<StartPositions> ReadLinePosition()
-        {
-            Console.Write(Resources.EnterPosition);
-            DataResult<StartPositions> dataResultPosition = ValidationHelper.ValidationStartPositions(Console.ReadLine());
-            if (!dataResultPosition.Success)
-            {
-                Console.WriteLine(dataResultPosition.Message);
-                dataResultPosition = ReadLinePosition();
-            }
-
-            return dataResultPosition;
-        }
-
-        private static DataResult<List<int>> ReadLineDimension()
-        {
-            Console.Write(Resources.EnterDimension);
-            DataResult<List<int>> dataResultDimension = ValidationHelper.ValidationDimension(Console.ReadLine());
-            if (!dataResultDimension.Success)
-            {
-                Console.WriteLine(dataResultDimension.Message);
-                dataResultDimension = ReadLineDimension();
-            }
-            return dataResultDimension;
-        }
-        #endregion
 
 
     }
